@@ -1,0 +1,90 @@
+---
+title: "Data Undersampling"
+output: html_document
+date: "2023-12-18"
+---
+
+Importa dati:
+```{r}
+data = read.csv('data.csv')
+# physiotherapy = read.csv('physiotherapy.csv')
+# data = read.csv('sani.csv')
+# data = read.csv('surgery.csv')
+```
+
+# Undersampling tenendo 1 osservazione ogni k
+```{r}
+k = 2
+data_undersampled = data[seq(1, dim(data)[1], by = k),]
+```
+
+# Undersampling personalizzato per righe
+
+Per lunghezze tra 400 e 600: tenere uguale
+Per lunghezze tra 600 e 1000: tenere una osservazione ogni 2
+Per lunghezze tra 1000 e 1728: tenere una osservazione ogni 3
+
+Calcola lunghezza della serie di ogni paziente:
+```{r}
+# Inizializza vettore di 0
+len_seq = rep(0, dim(data)[2])
+
+# Calcola la lunghezza della serie per ogni paziente
+for (i in 1:dim(data)[2]){
+    len_seq[i] = which(is.na(data[,i]))[1] - 1
+}
+
+# Imposta manualmente la lunghezza della serie più lunga 
+len_seq[which(is.na(len_seq))] = dim(data)[1]
+```
+
+Istogramma delle lunghezze delle serie
+```{r}
+hist(len_seq)
+```
+
+Calcola dataframe undersamplato
+```{r}
+# Calcola il nuovo numero massimo di osservazioni
+num_rows = max( max(len_seq[which(len_seq < 600)]), max(floor(len_seq[which(len_seq > 600 & len_seq < 1000)]/2)), max(floor(len_seq[which(len_seq > 1000)]/3 )) )
+
+# Inizializza nuovo dataframe con NA
+data_undersampled <- data.frame(matrix(NA, nrow = num_rows, ncol = dim(data)[2]))
+colnames(data_undersampled) <- colnames(data)
+
+for(i in 1:dim(data)[2]){
+  
+  # serie senza NA
+  vec = data[1:len_seq[i],i] 
+  
+  if(len_seq[i] < 600){
+    
+    vec2 = vec
+    
+  } else if (len_seq[i] < 1000){
+    # serie undersamplata
+    vec2 = vec[seq(1, length(vec), by = 2)] 
+    
+  } else {
+    # serie undersamplata
+    vec2 = vec[seq(1, length(vec), by = 3)] 
+  }
+  
+  # crea un vettore di NA per gli istanti di tempo rimanenti
+  NA_vec = rep(NA, num_rows - length(vec2)) 
+  
+  # concatena la serie undersamplata e il vettore di NA
+  vec2 = c(vec2, NA_vec) 
+  
+  # Inserisci nel dataframe
+  data_undersampled[,i] = vec2
+}
+```
+
+# Salva il dataframe
+
+```{r}
+write.csv(data_undersampled, file = 'Data_Undersampled.csv', row.names = FALSE)
+```
+
+
