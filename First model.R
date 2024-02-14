@@ -178,36 +178,6 @@ telesca_model <- function(y, niter = 100, nburn = 100, n_knots_h = 10, n_knots_m
     
     #-- Update Phi --#
     
-    # tmp_Bm<-list()
-    # for(i in 1:n_patients){
-    #   tmp_phi <- phi[[i]]
-    #   current_llik <- mvnfast::dmvn(X = as.numeric(y_list[[i]]), mu =  as.numeric(c_save[iter-1,i]+a_save[iter-1,i]*Bm[[i]] %*% beta_save[iter - 1,]),
-    #                        sigma = diag_m[[i]]* sigma_eps_save[iter - 1] , log = TRUE)
-    #   current_lprior <- mvnfast::dmvn(X = phi[[i]], mu = Upsilon,
-    #                          sigma = sigma_phi_save[iter - 1] * inv_P, log = TRUE)
-    #   for(j in 2:(q-1)){
-    #     tmp_phi[j] <- Arma_runif(max(tmp_phi[j] - tune, tmp_phi[j-1]),min(tmp_phi[j] + tune, tmp_phi[j+1]))
-    #     tmp_Bm[[i]] <- bs(Bh[[i]] %*% tmp_phi, knots = knots_m, intercept = TRUE)
-    # 
-    #     cand_llik <- mvnfast::dmvn(X = as.numeric(y_list[[i]]), mu =  as.numeric(c_save[iter-1,i]+a_save[iter-1,i]*tmp_Bm[[i]] %*% beta_save[iter - 1,]),
-    #                       sigma = sigma_eps_save[iter - 1] * diag_m[[i]], log = TRUE)
-    #     cand_lprior <- mvnfast::dmvn(X = tmp_phi, mu = Upsilon,
-    #                         sigma = sigma_phi_save[iter - 1] * inv_P, log = TRUE)
-    #     lratio <- cand_llik + cand_lprior - current_llik - current_lprior
-    # 
-    #     if(log(Arma_runif(0, 1)) < lratio){
-    #       current_llik <- cand_llik
-    #       current_lprior <- cand_lprior
-    #       accepts[i, j-1]= accepts[i, j-1]+1
-    #     }
-    #     else{
-    #       tmp_phi[j] <- phi[[i]][j]
-    #     }
-    #   }
-    #   phi[[i]] <- tmp_phi
-    #   phi_save[iter,,i]=tmp_phi
-    # 
-    # }
     
     for (i in 1:n_patients){
 
@@ -423,9 +393,7 @@ n_knots_m=20
 nburn = 50000
 niter = 15000
 
-# 1 ora 14%
-#19:11-22:01
-# 15 min 10%
+
 start.time <- Sys.time()
 telesca_output = telesca_model(y=y, niter = niter, nburn = nburn, n_knots_h = n_knots_h, 
                              n_knots_m = n_knots_m,
@@ -436,10 +404,6 @@ telesca_output = telesca_model(y=y, niter = niter, nburn = nburn, n_knots_h = n_
 end.time <- Sys.time()
 time.taken <- round(end.time - start.time,5)
 print(time.taken)
-# 1 ora per 2000 iterazioni con 10 pazienti, 8 nodi h, 40 nodi m (dati senza undersampling)
-# 2.8 minuti per 2000 iterazioni con 10 pazienti, 8 nodi h, 40 nodi m, con undersamplin (1 ogni 4)
-# 12.8 minuti per 2000 iterazioni con 32 pazienti, 8 nodi h, 40 nodi m, con undersampling (1 ogni 4)
-# 40 min 32 pazienti 8000 iterazioni
 
 # load("telesca_surgery.RData")
 # load("Telesca_fisio_def.Rdata")
@@ -542,14 +506,6 @@ matplot(sigma_phi_output, type='l',xlab = 'Iteration',
 matplot(sigma_eps_output, type='l',xlab = 'Iteration', 
         main='sigma^2_eps')
 
-
-
-# fancier traceplot
-prova = mcmc(a0_output)
-x11()
-xyplot(ts(prova))
-
-#graphics.off()
 
 
 
