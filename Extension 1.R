@@ -156,7 +156,7 @@ telesca_model <- function(y, niter = 100, nburn = 100, n_knots_h = 10, n_knots_m
   
   
   
-  X <- stack_Matrix(Bm)
+  X <- stack_Matrix(Bm,a_save[1,])
   
   diag_m <- lapply(1:n_patients, function(i) diag(n_obs[i]))
   
