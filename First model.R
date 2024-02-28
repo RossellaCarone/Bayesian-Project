@@ -54,11 +54,11 @@ omega_P <- function(dim){
   return (K)
 }
 
-stack_Matrix<-function(x_list){
+stack_Matrix<-function(x_list,a){
   n=length(x_list)
   X=NULL
   for (i in 1:n){
-    X= rbind(X,x_list[[i]])
+    X= rbind(X,a[i]*x_list[[i]])
   }
   return (X)
 }
@@ -228,15 +228,19 @@ telesca_model <- function(y, niter = 100, nburn = 100, n_knots_h = 10, n_knots_m
     
     #-- Update X --#
     
-    X <- stack_Matrix(Bm)
+    X <- stack_Matrix(Bm,a_save[iter-1,])
     
     #-- Update Beta --#
     
+    C=NULL
+    for (i in 1:n_patients){
+      C=c(C,rep(c_save[iter-1,i],n_obs[i]))
+    }
+    
     inv_sigma_beta = Omega/lambda_save[iter-1]
     inv_V_beta = inv_sigma_beta + (1/sigma_eps_save[iter-1])*crossprod(X)
-    
     V_beta = armaInv(inv_V_beta)
-    m_beta =V_beta%*%(t(X) %*% (1/sigma_eps_save[iter-1]*y) + inv_sigma_beta %*% beta_0 )
+    m_beta =V_beta%*%(t(X) %*% (1/sigma_eps_save[iter-1]*(y-C)) )
     beta_save[iter, ] =  Arma_mvrnorm(m_beta, V_beta)
     
     
